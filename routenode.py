@@ -6,9 +6,9 @@ from sys import argv
 LAST = False
 my_port = -1
 TIMER = -1
-
 dv = dict()
 rtng_tbl = dict()
+lock = threading.Semaphore(1)
 
 def parse_peers():
         global LAST, TIMER
@@ -43,7 +43,7 @@ def node_init():
 
 def dv_msg():
         global my_port
-        s = str(time.time) + ' ' + str(my_port) + ' '  
+        s = str(time.time()) + ' ' + str(my_port) + ' '  
         for k,v in dv.items():
                 s+= str(k) + ' ' + str(v) + ' '
         return s               
@@ -52,7 +52,48 @@ def send_dv(socket):
         dv_dgram = dv_msg().encode()
         for k,v in dv.items():
                 Send(socket, dv_dgram, ('127.0.0.1', k))        
+                pmessage('Message sent from Node {0} to Node {1}'.format(str(my_port), str(k))) 
+
+
+def display_rtng_tbl():
+        pass
+
+def perform_dvr_update(nport, dport, cost):
+        dv[dport] = cost
+        rtng_tbl[dport] = nport 
+
+def update_dv(nport, timestamp, msg):
+        update = False
+        pmessage('Message recienved at Node {0} from Node {1}'.format(str(my_port), str(port)))
         
+        for i in range(len(msg), 2):
+                try:
+                        dport = Port(msg[i], False)   
+                        cost = Cost(msg[i+1], False)
+                        if port not in dv.keys():
+                                peform_dvr_update(nport, dport, cost)
+                                                
+                except:
+                        return False
+        
+        display_rtng_tbl()        
+        return update
+
+
+#def update_rtng_tnl():
+
+def message_proc(sender_message):
+        global lock
+        try:
+                msg = sender_message.split()
+                ts = float(msg[0])
+                port = Port(msg[1], False)
+        except:
+                return        
+        lock.aquire()
+        update_dv(port,ts, msg[2:])           
+        lock.release()
+
 def main():
         global LAST, TIMER, my_port, dv, rtng_tbl
         if len(argv)< 5:
@@ -67,11 +108,17 @@ def main():
         #print('TABLE ', rtng_tbl)
         #print('DV: ', dv) 
         if LAST:
-                send_dv()
+                send_dv(my_sock)
 
         while(True):
                 sender_msg, sender_addr = my_sock.recvfrom(SIZE) 
+                pthread = threading.Thread(target = message_proc, args = (sender_msg.decode(), )) 
+                pthread.start()
+
                 print('NEW MSG: ', sender_msg)
+                
+                
+
 
 if __name__ == '__main__':
         main()

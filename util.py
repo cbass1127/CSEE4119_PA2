@@ -1,8 +1,9 @@
 import sys
 import socket 
+import time
 
 SIZE = 4096
-PROMPT = '>>'
+PROMPT = ''
 MAIN_P = 'routenode.py'
 
 def Die(message, error = True):
@@ -22,12 +23,12 @@ def pmessage(message, brackets=True):
     :return: None
     '''
     if(brackets):
-        print('\n'+PROMPT + ' [' + str(message)+']\n'+PROMPT + ' ', end ='')
+        print('\n'+ PROMPT + '[' + str(time.time()) + '] ' + str(message) + PROMPT, end ='')
     else:
         print(PROMPT + ' ' + message, end = ' ')
         sys.stdout.flush()
 
-def Port(p):
+def Port(p, die = True):
     '''
     Checks to see if port number is valid.
     :return: None
@@ -37,26 +38,32 @@ def Port(p):
         if(port < 1024 or port > 65535):
             raise ValueError
     except ValueError as ve:
-        Die('invalid port number {0}'.format(p))
+        if die:
+                Die('invalid port number {0}'.format(p))
+        else:
+                raise ValueError           
     return port
 
 
 def Socket(port):
     sock = socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM)
     try:
-        server_sock.bind(('0.0.0.0', port))
-    except:
+        sock.bind(('0.0.0.0', port))
+    except Exception as e:
         Die('cannot bind to port {0}'.format(port))
     return sock
 
-def Cost(c):
+def Cost(c, die = True):
     try:
         cost = int(c)
         if cost < 0:
             raise ValueError
     except ValueError as ve:
-        Die('invalid edge cost {0}'.format(c))
-    return cost
+        if die:
+                Die('invalid edge cost {0}'.format(c))
+        else:
+                raise ValueError
+        return cost
 
 def Send(socket, message, dest_addr):
     '''
