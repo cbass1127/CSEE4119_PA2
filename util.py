@@ -63,7 +63,7 @@ def Cost(c, die = True):
                 Die('invalid edge cost {0}'.format(c))
         else:
                 raise ValueError
-        return cost
+    return cost
 
 def Send(socket, message, dest_addr):
     '''
