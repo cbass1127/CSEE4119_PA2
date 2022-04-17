@@ -85,13 +85,98 @@ def perform_dvr_update(nport, dport, cost):
                 k in peer_dvs[nport].keys() and dv[nport] + peer_dvs[nport][k] < v:
                         dv[k] = dv[nport] + peer_dvs[nport][k]
                         rtng_tbl[k] = rtng_tbl[nport]
-        #print('\nRoute to Node {0} now costs {1} through Node {2}'.format(dport, cost, nport)) 
+
+def check_cost_increase(nport, msg, ts):
+        isincreased = False
+        peer_dv = dict()
+        
+        if nport not in peer_dvs.keys():
+                return False
+        for i in range(0, len(msg), 2):
+                try:
+                        dport = Port(msg[i], False)
+                        pcost = Cost(msg[i+1], False) 
+                        cost = pcost + dv[nport]
+                        peer_dv[dport] = pcost
+                        if dport in peer_dvs[nport].keys() and peer_dvs[nport][dport] < pcost:
+                                print('\nPeer {} cost to {} increased from {} to {}'.format(nport, dport, peer_dvs[nport][dport], pcost))
+                                isincreased = True     
+                        peer_dv[dport] = pcost
+                except Exception as e:
+                        raise e
+                        return True
+        latest[nport] =  ts
+        peer_dvs[nport] = peer_dv
+        return isincreased
+
+def recalibrate_state():
+        ischanged = False
+        cost = -1 
+        for dest in dv.keys():
+                if dest not in rtng_tbl.keys() or\
+                rtng_tbl[dest] not in peer_dvs.keys() or\
+                dest not in peer_dvs[rtng_tbl[dest]].keys():
+                        continue
+                if dest in nlink_costs.keys() and nlink_costs[dest] < dv[rtng_tbl[dest]] + peer_dvs[rtng_tbl[dest]][dest]: 
+                        cost = nlink_costs[dest]
+                        dv[dest] = cost
+                        rtng_tbl[dest] = dest
+                else:
+                        cost = dv[rtng_tbl[dest]] + peer_dvs[rtng_tbl[dest]][dest]
+                        perform_dvr_update(rtng_tbl[dest], dest, cost) 
+                #print('COST TO {} is CURRENTLY {}. COST TO dv[{}] = {};  peer_dvs[{}][{}] = {}'.format(dest, cost, rtng_tbl[dest], dv[rtng_tbl[dest]], rtng_tbl[dest], dest, peer_dvs[rtng_tbl[dest]][dest] ))
+                for neighbor in nlink_costs.keys():
+                    if dest not in peer_dvs[neighbor].keys():
+                        continue
+                    ncost = dv[neighbor] + peer_dvs[neighbor][dest]
+                    if ncost < cost:
+                        perform_dvr_update(neighbor, dest, ncost)
+                        cost = ncost
+                        ischanged = True    
+        display_rtng_tbl()
+        return True 
+def update_min_path(affected_dests):
+        global my_port
+        print('\n' ,affected_dests)
+        for dest in affected_dests:
+                curr = dv[dest]
+                print('\nCURR DISTANCE TO {} is {}'.format(dest, curr))
+                for k,v in nlink_costs.items():
+                        if k not in peer_dvs.keys():
+                                continue 
+                        if dest in peer_dvs[k].keys() and dv[k] + peer_dvs[k][dest] < curr:
+                                perform_dvr_update(k, dest, dv[k] + peer_dvs[k][dest])
+                                print('\n update to dest {}; next hop at {} at a total cost of {}. dk[k] = {} and peer_dvs[k][dest] = {}'.format(dest, rtng_tbl[k],  
+                                dv[k] + peer_dvs[k][dest], dv[k], peer_dvs[k][dest]))  
+                        elif dest == k and nlink_costs[k] < curr:
+                                dv[dest] = nlink_costs[k]
+                                rtng_tbl[dest] = k
+        
+        for k,v in nlink_costs.items():
+                #if k not in peer_dvs.keys():
+                #        continue
+                for k2,v2 in peer_dvs[k].items():
+                        if k2 in dv.keys() and v2 + dv[k] < dv[k2]:
+                                perform_dvr_update(k, k2, v2 + dv[k])
+
+def affected_dests(node, diff):
+        affected = []
+        for k,v in rtng_tbl.items():
+                if v == node:
+                        if k != v:
+                                dv[k]+=diff
+                        affected.append(k)
+        return affected
 
 def update_dv(nport, ts, msg):
         global my_port
         update = False
         peer_dv = dict()
         pmessage('Message recieved at Node {0} from Node {1}'.format(str(my_port), str(nport)))
+        
+        if check_cost_increase(nport, msg, ts):
+                return recalibrate_state()
+                        
         for i in range(0, len(msg), 2):
                 try:
                         dport = Port(msg[i], False)
@@ -118,32 +203,11 @@ def update_dv(nport, ts, msg):
         return update
 
 
-def update_min_path(affected_dests):
-        global my_port
-        for dest in affected_dests:
-                curr = dv[dest]
-                for k,v in nlink_costs.items():
-                        updated = False
-                        if dest in peer_dvs[k] and dv[k] + peer_dvs[k][dest] < curr:
-                                perform_dvr_update(k, dest, dv[k] + peer_dvs[k][dest])
-                        elif dest == k and nlink_costs[k] < curr:
-                                dv[dest] = nlink_costs[k]
-                                rtng_tbl[dest] = k
-        for k,v in nlink_costs.items():
-                for k2,v2 in peer_dvs[k].items():
-                        if k2 in dv.keys() and v2 + dv[k] < dv[k2]:
-                                perform_dvr_update(k, k2, v2 + dv[k])
-
 def trigger_update(port, diff):
         changed = False
-        affected_dests = []
-        for k,v in rtng_tbl.items():
-                if v == port and k != v:
-                        dv[k]+=diff
-                        affected_dests.append(k)
-                        changed = True
-        update_min_path(affected_dests)
-        return changed
+        affected = affected_dests(port, diff)
+        update_min_path(affected)
+        return len(affected) > 0
 
 def triggered_change(socket, port, new_cost):
         diff = new_cost - nlink_costs[port]
@@ -190,11 +254,16 @@ def trigger_ctrl_msg(socket, port):
 
 def trigger_change(socket):
         global TIMER
-        time.sleep(5) #CHANGE!!!!
+        global my_port
+        time.sleep(10) #CHANGE!!!!
         local_change = False
         max_port = sorted(dv.keys())[-1]        
         diff = TIMER - nlink_costs[max_port]
-        max_port = sorted(dv.keys())[-1]        
+        ports = sorted(dv.keys())        
+        max_port = ports[-1]
+        if max_port == my_port:
+               ports.pop(-1)
+               max_port = ports[-1]
         if dv[max_port] == nlink_costs[max_port]:
                 dv[max_port] = TIMER
                 local_change = True
