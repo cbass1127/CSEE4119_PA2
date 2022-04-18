@@ -55,7 +55,7 @@ def Socket(port):
 
 def Cost(c, die = True):
     try:
-        cost = int(c)
+        cost = float(c)
         if cost < 0:
             raise ValueError
     except ValueError as ve:

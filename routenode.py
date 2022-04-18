@@ -3,6 +3,7 @@ import time
 from util import *
 from sys import argv
 
+POISON = False
 LAST = False
 shared_tbl = False
 my_port = -1
@@ -15,10 +16,13 @@ peer_dvs = dict()
 nlink_costs = dict()
 
 def parse_peers():
-        global LAST, TIMER
+        global LAST, TIMER, POISON
         peer_ports = []
         peer_costs = []
         ind = -1
+        
+        if argv[2] == 'p':
+               POISON = True
         for i in range(5, len(argv), 2):
                 ind = i
                 if argv[i] == 'last':
@@ -59,23 +63,54 @@ def node_init():
         init_state_info(peer_ports, peer_costs)
         display_rtng_tbl()    
 
-def dv_msg():
+def dv_msg(fake = False, fakedv = None):
         global my_port
+        costmap = dv if not fake else fakedv
         s = str(time.time()) + ' ' + str(my_port) + ' '  
-        for k,v in dv.items():
+        for k,v in costmap.items():
                 if k == my_port:
                         continue
                 s+= str(k) + ' ' + str(v) + ' '
         return s               
  
+
+#def send_dv(socket, individual = False, port = None, fakedv = None):
+#        global my_port
+#        if not individual:
+#                dv_dgram = dv_msg().encode()
+#                for k,v in dv.items():
+#                        if k == my_port:
+#                                continue
+#                        Send(socket, dv_dgram, ('127.0.0.1', k))        
+#                        pmessage('Message sent from Node {0} to Node {1}'.format(str(my_port), str(k)))
+#        else:
+#                dv_dgram = dv_msg(True, fakedv).encode()
+                #dv_dgram = dv_msg().encode()
+#                print('\nSENDING DGRAM {} to {}'.format(dv_dgram, port))
+#                Send(socket, dv_dgram, ('127.0.0.1', port))
+
+
+def find_rtng_keys(value):
+        keys = []
+        for k,v in rtng_tbl.items():
+                if v == value:
+                        keys.append(k)
+        return keys
+
 def send_dv(socket):
         global my_port
         dv_dgram = dv_msg().encode()
         for k,v in dv.items():
                 if k == my_port:
                         continue
+                if POISON and k in rtng_tbl.values():
+                        dests = find_rtng_keys(k)
+                        fakedv = dv.copy()
+                        for dest in dests:
+                                fakedv[dest] = float('inf')
+                        dv_dgram = dv_msg(True, fakedv).encode()
                 Send(socket, dv_dgram, ('127.0.0.1', k))        
-                pmessage('Message sent from Node {0} to Node {1}'.format(str(my_port), str(k))) 
+                pmessage('Message sent from Node {0} to Node {1}'.format(str(my_port), str(k)))
 
 def perform_dvr_update(nport, dport, cost):
         dv[dport] = cost
@@ -86,6 +121,17 @@ def perform_dvr_update(nport, dport, cost):
                         dv[k] = dv[nport] + peer_dvs[nport][k]
                         rtng_tbl[k] = rtng_tbl[nport]
 
+#def lie_to_neighbors(socket):
+#        global my_port
+#        print('\nLYING')
+#        for k,v in dv.items():
+#                if k == my_port:
+#                        continue
+#                fake_dv = dv.copy()
+#                intermediate = rtng_tbl[k]
+#                fake_dv[k] = float('inf')
+#                send_dv(socket, True, intermediate, fake_dv)    
+                
 def check_cost_increase(nport, msg, ts):
         isincreased = False
         peer_dv = dict()
@@ -99,7 +145,7 @@ def check_cost_increase(nport, msg, ts):
                         cost = pcost + dv[nport]
                         peer_dv[dport] = pcost
                         if dport in peer_dvs[nport].keys() and peer_dvs[nport][dport] < pcost:
-                                print('\nPeer {} cost to {} increased from {} to {}'.format(nport, dport, peer_dvs[nport][dport], pcost))
+                                #print('\nPeer {} cost to {} increased from {} to {}'.format(nport, dport, peer_dvs[nport][dport], pcost))
                                 isincreased = True     
                         peer_dv[dport] = pcost
                 except Exception as e:
@@ -109,7 +155,7 @@ def check_cost_increase(nport, msg, ts):
         peer_dvs[nport] = peer_dv
         return isincreased
 
-def recalibrate_state():
+def recalibrate_state(socket):
         ischanged = False
         cost = -1 
         for dest in dv.keys():
@@ -135,6 +181,7 @@ def recalibrate_state():
                         ischanged = True    
         display_rtng_tbl()
         return True 
+
 def update_min_path(affected_dests):
         global my_port
         print('\n' ,affected_dests)
@@ -168,14 +215,14 @@ def affected_dests(node, diff):
                         affected.append(k)
         return affected
 
-def update_dv(nport, ts, msg):
+def update_dv(nport, ts, msg, socket):
         global my_port
         update = False
         peer_dv = dict()
         pmessage('Message recieved at Node {0} from Node {1}'.format(str(my_port), str(nport)))
         
         if check_cost_increase(nport, msg, ts):
-                return recalibrate_state()
+                return recalibrate_state(socket)
                         
         for i in range(0, len(msg), 2):
                 try:
@@ -194,7 +241,7 @@ def update_dv(nport, ts, msg):
                         #print('\n({0}) --> ({1}) :  {2}'.format(my_port, dport, dv[dport]))
                         #print('\n({0}) --> ({1}) --> ({2}) : {3}'.format(my_port, nport, dport ,cost))
                 except Exception as e:
-                        #print('\nException: ' + str(e))
+                        print('\nEXCEPTION: ' + str(e))
                         raise e
                         return False
         latest[nport] =  ts
@@ -238,7 +285,7 @@ def message_proc(sender_message, sock):
         if isstale:
                 lock.release()
                 return
-        isupdated = update_dv(port, float(msg[0]), msg[2:])           
+        isupdated = update_dv(port, float(msg[0]), msg[2:], sock)           
         lock.release()
         if isupdated:
                 send_dv(sock)
@@ -257,8 +304,6 @@ def trigger_change(socket):
         global my_port
         time.sleep(10) #CHANGE!!!!
         local_change = False
-        max_port = sorted(dv.keys())[-1]        
-        diff = TIMER - nlink_costs[max_port]
         ports = sorted(dv.keys())        
         max_port = ports[-1]
         if max_port == my_port:
@@ -267,6 +312,7 @@ def trigger_change(socket):
         if dv[max_port] == nlink_costs[max_port]:
                 dv[max_port] = TIMER
                 local_change = True
+        diff = TIMER - nlink_costs[max_port]
         nlink_costs[max_port] = TIMER
         pmessage('Node {0} cost updated to {1}'.format(max_port, TIMER))
         trigger_ctrl_msg(socket, max_port)
@@ -274,7 +320,7 @@ def trigger_change(socket):
         if ischanged or local_change:
                 send_dv(socket)
 def main():
-        global LAST, TIMER, my_port, dv, rtng_tbl
+        global LAST, TIMER, POISON, my_port, dv, rtng_tbl
         if len(argv)< 5:
                 Die('Usage: routenode dv <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ...'\
                     '[last][<cost-change>]', False)    
