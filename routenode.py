@@ -1,5 +1,7 @@
 import threading
 import time
+import os
+from ls import start_ls
 from util import *
 from sys import argv
 
@@ -322,11 +324,17 @@ def trigger_change(socket):
 def main():
         global LAST, TIMER, POISON, my_port, dv, rtng_tbl
         if len(argv)< 5:
-                Die('Usage: routenode dv <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ...'\
-                    '[last][<cost-change>]', False)    
+                Die('Usage: routenode <dv/ls> <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ...'\
+                    '[last][<cost-change>]'
+                , False)    
+        
+        if argv[1] ==  'ls':
+                return start_ls(argv) 
+
         my_port = Port(argv[4])
         my_sock = Socket(my_port) 
         node_init()
+         
         if LAST:
                 send_dv(my_sock)
         if TIMER > 0:

@@ -65,6 +65,18 @@ def Cost(c, die = True):
                 raise ValueError
     return cost
 
+def Interval(i):
+    try:
+        interval = int(i)
+        if interval < 0:
+            raise ValueError
+    except ValueError as ve:
+        if die:
+                Die('invalid edge cost {0}'.format(c))
+        else:
+                raise ValueError
+    return interval
+
 def Send(socket, message, dest_addr):
     '''
     Sends message through socket to dest_addr
