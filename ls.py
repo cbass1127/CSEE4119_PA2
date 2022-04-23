@@ -63,19 +63,21 @@ def dijkstra():
         dist[my_port] = 0
         while verts:
                 u = vert_min_distance(verts, dist)
-                if u == 2222:
-                        print('dist[200] = ', dist[u])
-                        print('DISTS: ', dist, 'VERTS: ', verts) 
                 verts.remove(u)
+                #if u == 2222:
+                #        print('distance to 2222', dist[u], ' NEXT STEP: ', rtng_tbl[u])
                 if u not in peer_links.keys():
                         continue
                 for v in peer_links[u].keys():
                         alt = dist[u] + peer_links[u][v]
                         if alt < dist[v]:
                                 dist[v] = alt
-                                if v not in peers:
+                                if u != v and u != my_port:
                                         rtng_tbl[v] = rtng_tbl[u]           
-       
+                                        if v == 1111 and u == 2222:
+                                                print('rtng_tbl 2222 ', rtng_tbl[2222])
+                                                print('distance rtng_tbl to 1111 from 2222 changed to ', rtng_tbl[v])
+                                                
         print(dist)
         print(rtng_tbl)
         #print(peer_links)
@@ -103,17 +105,19 @@ def parse_peers_ls(argv):
 
 def lsa_msg():
         global my_port, SEQ_NO
-        s = str(my_port) + ' ' + str(time.time()) + ' '
+        seqno = str(time.time())
+        s = str(my_port) + ' ' + seqno + ' '
         for k,v in lsa.items():
                 s+=(str(k) + ' ' + str(v) + ' ' )
-        return s.encode()
+        return s.encode(), seqno
 
 
 def send_lsa(omit = False, omits = None ):
-        global my_sock
-        dgram = lsa_msg()
+        global my_sock, my_port
+        dgram, seqno = lsa_msg()
         for peer in peers:
                 if not omit or peer not in omits:        
+                        pmessage('''LSA of Node {} with sequence number {} sent to Node {}'''.format(my_port, seqno, peer))
                         Send(my_sock, dgram, ('127.0.0.1', peer))
 
 def init_state_info_ls(peer_ports, peer_costs):
@@ -147,7 +151,7 @@ def relay_msg(sender_message, omit = False, omits = None):
                 if not omit or peer not in omits:
                         Send(my_sock, dgram, ('127.0.0.1', peer))
 
-def message_proc(sender_message):
+def message_proc(sender_message, s_port):
         global my_sock, shared_tbl, lock, peers_rcvd
         try:
                 msg = sender_message.split()
@@ -166,9 +170,15 @@ def message_proc(sender_message):
                 lock.release()
                 return
         if msg_tup in peers_rcvd:
+                pmessage(
+                '''DUPLICATE LSA packet Received, AND DROPPED:
+                        - LSA of node {}
+                        - Sequence number {}
+                        - Received from {}'''.format(port, seqno, s_port))
                 lock.release()
                 return
         else:
+                pmessage('''DUPLICATE LSA packet Recieved, AND DROPPED''')
                 latest[port] = seqno
                 peers_rcvd.add(msg_tup)
                 relay_msg(sender_message, True, [port])
@@ -214,7 +224,7 @@ def main_ls(argv):
         uthread.start()
         while(True):
                 sender_msg, sender_addr = my_sock.recvfrom(SIZE) 
-                pthread = threading.Thread(target = message_proc, args = (sender_msg.decode(), )) 
+                pthread = threading.Thread(target = message_proc, args = (sender_msg.decode(), sender_addr[1])) 
                 pthread.start()
 
 if __name__ == '__main__':
