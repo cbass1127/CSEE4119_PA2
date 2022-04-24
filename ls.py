@@ -7,6 +7,8 @@ import random
 
 
 ROUTING_INTERVAL = 10
+TRIGGER_CHANGE  = 1.2*ROUTING_INTERVAL
+TRIGGERED = False
 my_sock = None
 MAX_SEQ_NO = sys.maxsize
 SEQ_NO = -1
@@ -28,17 +30,59 @@ peers_rcvd = set()
 peer_links = dict()
 shortest_path = dict()
 
+def display_rtng_tbl(dist):
+        global my_port
+        pmessage('Node {0} Routing Table\n'.format(my_port))
+        for k in sorted(dist.keys()):
+                if k == my_port:
+                        continue
+                print('- (' + str(dist[k])  + ') -> Node ' + str(k), end = '')
+                if rtng_tbl[k] != k:
+                        print('; Next hop -> Node ' + str(rtng_tbl[k]), end = ' ')
+                print()
+
+def display_ntwk_top():
+        global my_port
+        pmessage('Node {0} Network topology\n'.format(my_port))
+        for k in sorted(peer_links.keys()):
+#                if k == my_port:
+#                        continue
+                if len(peer_links[k].keys()) == 0:
+                        continue
+                for d in sorted(peer_links[k].keys()):
+                        print('- (' + str(peer_links[k][d])  + ') from Node  ' + str(k) + ' to Node ' + str(d), end = '')
+                        print()
+
 def update_lsa_info(msg, port):
         global my_port
+        changed = False
         if port not in peer_links.keys():
                 peer_links[port] = dict()
+                changed = True 
         for i in range(0, len(msg) - 1, 2):
                 try:
                         p = Port(msg[i])
                         c = Cost(msg[i + 1])
+                        if p in peer_links[port].keys() and c != peer_links[port][p]:
+                                changed = True
                         peer_links[port][p] = c
                 except Exception as e:
                         return
+        if changed:
+                display_ntwk_top()
+
+def link_change(msg):
+        try:
+                peer = Port(msg[0], False)
+                newcost = Cost(msg[1], False)      
+                lsa[peer] = newcost
+                pmessage('Node {} cost updated to {}'.format(peer, newcost))
+                print('------------------------------------')
+                print(lsa)
+                print('------------------------------------')
+
+        except:
+                return
 
 def vert_min_distance(verts, dist):
         minimum = sys.maxsize
@@ -48,6 +92,7 @@ def vert_min_distance(verts, dist):
                         minimum = dist[vert]
                         mvert = vert
         return mvert
+
 
 def dijkstra():
         dist = dict()
@@ -74,12 +119,10 @@ def dijkstra():
                                 dist[v] = alt
                                 if u != v and u != my_port:
                                         rtng_tbl[v] = rtng_tbl[u]           
-                                        if v == 1111 and u == 2222:
-                                                print('rtng_tbl 2222 ', rtng_tbl[2222])
-                                                print('distance rtng_tbl to 1111 from 2222 changed to ', rtng_tbl[v])
                                                 
-        print(dist)
-        print(rtng_tbl)
+        display_rtng_tbl(dist)
+        #print(dist)
+        #print(rtng_tbl)
         #print(peer_links)
 
 def parse_peers_ls(argv):
@@ -103,14 +146,16 @@ def parse_peers_ls(argv):
                 TIMER = int(argv[ind + 1])
         return peer_ports, peer_costs
 
-def lsa_msg():
+def lsa_msg(trigger = False):
         global my_port, SEQ_NO
         seqno = str(time.time())
-        s = str(my_port) + ' ' + seqno + ' '
-        for k,v in lsa.items():
-                s+=(str(k) + ' ' + str(v) + ' ' )
+        if not trigger:
+                s = str(my_port) + ' ' + seqno + ' '
+                for k,v in lsa.items():
+                        s+=(str(k) + ' ' + str(v) + ' ' )
+        else:
+                s = 'T ' + str(my_port) + ' ' + str(TIMER) + ' '
         return s.encode(), seqno
-
 
 def send_lsa(omit = False, omits = None ):
         global my_sock, my_port
@@ -119,6 +164,12 @@ def send_lsa(omit = False, omits = None ):
                 if not omit or peer not in omits:        
                         pmessage('''LSA of Node {} with sequence number {} sent to Node {}'''.format(my_port, seqno, peer))
                         Send(my_sock, dgram, ('127.0.0.1', peer))
+
+def send_trigger_lsa(peer):
+        global my_sock, my_port
+        dgram, seqno = lsa_msg(True)
+        Send(my_sock, dgram, ('127.0.0.1', peer))
+        pmessage('Link value message sent from Node {} to Node {}'.format(my_port, peer))
 
 def init_state_info_ls(peer_ports, peer_costs):
         for i in range(len(peer_ports)):
@@ -144,15 +195,23 @@ def node_init_ls(argv):
 def start_ls(argv):
         main_ls(argv)
 
-def relay_msg(sender_message, omit = False, omits = None):
+def relay_msg(sender_message, port, seqno, omit = False, omits = None):
         global my_sock
         dgram = sender_message.encode()
         for peer in peers:
                 if not omit or peer not in omits:
+                        pmessage('''LSA of Node {} with sequence number {} sent to Node {}'''.format(port, seqno, peer))
                         Send(my_sock, dgram, ('127.0.0.1', peer))
 
 def message_proc(sender_message, s_port):
         global my_sock, shared_tbl, lock, peers_rcvd
+        msg = sender_message.split()
+        if msg[0] == 'T':
+                pmessage('Link value message received at Node {} from Node {}'.format(my_port, s_port))
+                link_change(msg[1:])
+                dijkstra()
+                send_lsa()
+                return
         try:
                 msg = sender_message.split()
                 port = Port(msg[0], False)
@@ -178,10 +237,10 @@ def message_proc(sender_message, s_port):
                 lock.release()
                 return
         else:
-                pmessage('''DUPLICATE LSA packet Recieved, AND DROPPED''')
+                pmessage('''LSA of node {} with sequence number {} received from Node {}'''.format(port, seqno, s_port))
                 latest[port] = seqno
                 peers_rcvd.add(msg_tup)
-                relay_msg(sender_message, True, [port])
+                relay_msg(sender_message, port, seqno, True, [port])
 
         update_lsa_info(msg[2:], port) 
         lock.release()
@@ -189,6 +248,15 @@ def message_proc(sender_message, s_port):
                 shared_tbl = True
                 send_lsa()
                 
+def trigger_cost_change():
+        global TIMER
+        largest = max(peers) 
+        lsa[largest] = TIMER
+        pmessage('Node {} cost updated to {}'.format(largest, TIMER))
+        dijkstra()
+        send_trigger_lsa(largest)
+        send_lsa()
+
 def timer_send():
         global shared_tbl, UPDATE_INTERVAL
         while not shared_tbl:
@@ -204,20 +272,24 @@ def timer_update():
         while True:
                 time.sleep(ROUTING_INTERVAL)
                 dijkstra()
-   
+
+def timer_trigger():
+        global TRIGGER_CHANGE
+        time.sleep(TRIGGER_CHANGE)
+        trigger_cost_change()
+
 def main_ls(argv):
         global my_sock, my_port
         my_port = Port(argv[4])
         my_sock = Socket(my_port) 
         node_init_ls(argv)
-        print(lsa) 
+        display_ntwk_top()
         if LAST:
                 send_lsa()
                 shared_tbl = True 
         if TIMER > 0:
-                #tthread = threading.Thread(target = trigger_change, args = (my_sock,))
-                #tthread.start()
-                pass
+                tthread = threading.Thread(target = timer_trigger)
+                tthread.start()
         tthread = threading.Thread(target = timer_send)
         uthread = threading.Thread(target = timer_update)
         tthread.start()
@@ -227,5 +299,5 @@ def main_ls(argv):
                 pthread = threading.Thread(target = message_proc, args = (sender_msg.decode(), sender_addr[1])) 
                 pthread.start()
 
-if __name__ == '__main__':
-        main()
+#if __name__ == '__main__':
+#        main()
