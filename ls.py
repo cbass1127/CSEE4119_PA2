@@ -77,10 +77,6 @@ def link_change(msg):
                 newcost = Cost(msg[1], False)      
                 lsa[peer] = newcost
                 pmessage('Node {} cost updated to {}'.format(peer, newcost))
-                print('------------------------------------')
-                print(lsa)
-                print('------------------------------------')
-
         except:
                 return
 
@@ -186,10 +182,10 @@ def init_state_info_ls(peer_ports, peer_costs):
 
 def node_init_ls(argv):
         peer_ports, peer_costs = parse_peers_ls(argv)
-        print('PEER PORTS :', peer_ports)
-        print('PEER COSTS : ', peer_costs)
-        print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
-        print('LAST: ', LAST)
+        #print('PEER PORTS :', peer_ports)
+        #print('PEER COSTS : ', peer_costs)
+        #print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
+        #print('LAST: ', LAST)
         init_state_info_ls(peer_ports, peer_costs)
 
 def start_ls(argv):
