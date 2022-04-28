@@ -186,24 +186,19 @@ def recalibrate_state(socket):
 
 def update_min_path(affected_dests):
         global my_port
-        print('\n' ,affected_dests)
         for dest in affected_dests:
                 curr = dv[dest]
-                print('\nCURR DISTANCE TO {} is {}'.format(dest, curr))
                 for k,v in nlink_costs.items():
                         if k not in peer_dvs.keys():
                                 continue 
                         if dest in peer_dvs[k].keys() and dv[k] + peer_dvs[k][dest] < curr:
                                 perform_dvr_update(k, dest, dv[k] + peer_dvs[k][dest])
-                                print('\n update to dest {}; next hop at {} at a total cost of {}. dk[k] = {} and peer_dvs[k][dest] = {}'.format(dest, rtng_tbl[k],  
                                 dv[k] + peer_dvs[k][dest], dv[k], peer_dvs[k][dest]))  
                         elif dest == k and nlink_costs[k] < curr:
                                 dv[dest] = nlink_costs[k]
                                 rtng_tbl[dest] = k
         
         for k,v in nlink_costs.items():
-                #if k not in peer_dvs.keys():
-                #        continue
                 for k2,v2 in peer_dvs[k].items():
                         if k2 in dv.keys() and v2 + dv[k] < dv[k2]:
                                 perform_dvr_update(k, k2, v2 + dv[k])
@@ -277,9 +272,9 @@ def message_proc(sender_message, sock):
         except:
                 return        
         if msg[0] == 'LC':
-                pmessage('Link value message recieved at Node {0} from Node {1}'.format(my_port, int(msg[3])))
-                new_cost = int(msg[2])
-                return triggered_change(sock, int(msg[3]), new_cost)
+                pmessage('Link value message recieved at Node {0} from Node {1}'.format(my_port, float(msg[3])))
+                new_cost = float(msg[2])
+                return triggered_change(sock, float(msg[3]), new_cost)
         lock.acquire()
         isstale = False
         if port in latest.keys():

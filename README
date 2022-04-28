@@ -1,0 +1,140 @@
+Sebastian Hereu smh2278
+CSEE4119 PA2 SPRING '22
+
+This project seeks to implement an emulation of the link-state (LS) and distance
+vector (DV) protocols by using a local, small computer network. To use the
+main program routenode.py, one starts multiple instances of the program with
+specified CL arguments on the same computer. For both LS
+and DV, I used a thread-based approach in which a main thread listens for
+incoming UDP messages and delegates the processing of those messages to a
+freshly spawned thread. The libraries used are,
+
+threading
+time
+os
+sys
+
+No special data structures were used, only basic python dicts, sets, and
+arrays. As specified by the DV protocol, a BELLMAN-FORD algorithm is used to
+determine distances in a distributed manner. For the LS protocol, a
+localized use of dijkstra's shortest path algorithm was used. Given the
+difference in underlying algorithm and distributed/independent nodes of DV
+and LS respectively, the implementations were different.
+
+For the DV protocol, one can toggle between regular mode and
+poisoned-reverse mode (see section on CL args). Using poisoned-reverse
+mitigtes the "count to infinty" prbolem associated with DV.
+
+
+Additionally, I defined a helper file, util.py that contains several
+error-checking functions. For example, util.Port() tries to parse a valid
+port number from the command line and datagrams.
+
+
+routenode.py is the interface to both DV and LS routing functionalities.
+Below, I give the command Syntax pulled DIRECTLY from the lab spec.
+
+==========================================================================================================================================================
+
+FROM Prof. Gil Zussman @ COlumbia University
+
+
+DV:
+
+$ routenode dv <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ...
+[last][<cost-change>]
+1) routenode
+2 ) dv
+3) r/p
+4) update-interval
+5) local-port
+6) neighbor#-port
+7) cost-#
+8)last
+9) cost-change
+10) ctrl+C (exit)
+
+
+1) Program name.
+2) run the distance vector algorithm
+3) Mode of program - regular or Poisoned Reverse.
+4) Not used (will be used in the LS section) - can be any value.
+5) The UDP listening port number (1024-65534) of the node.
+6) The UDP listening port number (1024-65534) of one of the neighboring nodes.
+7) This will be used as the link distance to the neighbor#-port.
+8) It is an integer that represents the cost/weight of the link.
+9) Indication of the last node information of the network. The program should understand this arg as optional (hence represented in brackets above). Upon the input of the command with this argument, the routing message exchanges among the nodes should kick in. Indication of the new cost that will be assigned to the link between the last node and its neighbor with the highest port number (see Section 2.8). The program should understand this arg as optional (hence represented in brackets above).
+10) Use ctrl+C to exit the program.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+LS:
+
+$ routenode ls <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ... [last][<cost-change>]
+
+1) routenode
+2) ls
+3) r/p
+4) update-interval
+5) local-port
+6) neighbor#-port
+7) cost-#
+8) last
+9) cost-change
+10) ctrl+C (exit)
+
+
+
+
+1) Program name.
+2) Run the link state algorithm
+3) Mode of program - regular.
+4) Node LSA broadcast period (1-5) seconds.
+5) The UDP listening port number (1024-65534) of the node.
+6) The UDP listening port number (1024-65534) of one of the neighboring nodes.
+This will be used as the link distance to the neighbor#-port.
+7)It is an integer that and represents the cost/weight of the link.
+8) Indication of the last node information of the network. The program should understand this arg as optional (hence represented in brackets above). Upon the input of t
+he command with this argument, the routing message exchanges among the nodes should kick in.
+9)Indication of the new cost that will be assigned to the link between the last node and its neighbor with the highest port number (see Section 3.9). The program should understand this arg as optional (hence represented in brackets above).
+10) Use ctrl+C to exit the program
+
+==========================================================================================================================================================
+
+
+Despite routenode.py being the main driver program,
+ONLY DV functionality is implemented in routenode.py, while ALL LS
+functionality is implemented in ls.py. This allowed for separation of the
+two completely different protocols in different files. I wrote the DV
+component in routenode.py and decided keep the LS component in a different
+file for organizational purposes.
+
+
+
+Here is a summary of the files submitted:
+
+---- routenode.py - main driver program, also contains DV implementation.
+-
+---- ls.py - contains all LS functionality. 
+-
+---- util.py - helper functions used both in LS and DV implementations
+--
+---- test.txt - contains test outputs.
+-
+---- README - the current file.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
