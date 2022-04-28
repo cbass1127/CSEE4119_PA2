@@ -1,0 +1,1141 @@
+===========================================================================================================================
+===========================================================================================================================
+
+LINK STATE TESTS:
+
+===========================================================================================================================
+===========================================================================================================================
+
+python3 routenode.py ls r 2 1111 2222 4 3333 5 4444 10
+python3 routenode.py ls r 2 2222 1111 4 4444 3
+python3 routenode.py ls r 2 3333 1111 5 5555 7 
+python3 routenode.py ls r 2 4444 1111 10 2222 3 5555 2
+python3 routenode.py ls r 2 5555 3333 7 4444 2 last
+
+
+FINAL RTNG_TBLS:
+
+[1651112320.579889] Node 1111 Routing Table
+- (4.0) -> Node 2222
+- (5.0) -> Node 3333
+- (7.0) -> Node 4444; Next hop -> Node 2222 
+- (9.0) -> Node 5555; Next hop -> Node 2222 
+
+[1651112322.651854] Node 2222 Routing Table
+- (4.0) -> Node 1111
+- (9.0) -> Node 3333; Next hop -> Node 1111
+- (3.0) -> Node 4444
+- (5.0) -> Node 5555; Next hop -> Node 4444
+
+[1651112317.943174] Node 3333 Routing Table
+- (5.0) -> Node 1111
+- (9.0) -> Node 2222; Next hop -> Node 1111
+- (9.0) -> Node 4444; Next hop -> Node 5555
+- (7.0) -> Node 5555
+
+[1651112325.951861] Node 4444 Routing Table
+- (7.0) -> Node 1111; Next hop -> Node 2222
+- (3.0) -> Node 2222
+- (9.0) -> Node 3333; Next hop -> Node 5555
+- (2.0) -> Node 5555
+
+[1651112317.9360769] Node 5555 Routing Table
+- (9.0) -> Node 1111; Next hop -> Node 4444
+- (5.0) -> Node 2222; Next hop -> Node 4444
+- (7.0) -> Node 3333
+- (2.0) -> Node 4444
+
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+
+python3 routenode.py ls r 2 1111 2222 3 3333 1 4444 6 5555 9
+python3 routenode.py ls r 2 2222 1111 3 4444 1
+python3 routenode.py ls r 2 3333 1111 1 5555 2
+python3 routenode.py ls r 2 4444 1111 6 2222 1 5555 2
+python3 routenode.py ls r 2 5555 1111 9 3333 2 4444 2 last
+
+
+FINAL RTNG_TBLS:
+
+[1651112670.7663157] Node 1111 Routing Table
+- (3.0) -> Node 2222
+- (1.0) -> Node 3333
+- (4.0) -> Node 4444; Next hop -> Node 2222 
+- (3.0) -> Node 5555; Next hop -> Node 3333 
+
+[1651112672.959895] Node 2222 Routing Table
+- (3.0) -> Node 1111
+- (4.0) -> Node 3333; Next hop -> Node 1111 
+- (1.0) -> Node 4444
+- (3.0) -> Node 5555; Next hop -> Node 4444 
+
+[1651112674.827807] Node 3333 Routing Table
+- (1.0) -> Node 1111
+- (4.0) -> Node 2222; Next hop -> Node 1111 
+- (4.0) -> Node 4444; Next hop -> Node 5555 
+- (2.0) -> Node 5555
+
+[1651112668.5595558] Node 4444 Routing Table
+- (4.0) -> Node 1111; Next hop -> Node 2222
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333; Next hop -> Node 5555
+- (2.0) -> Node 5555
+
+[1651112678.5084298] Node 5555 Routing Table
+- (3.0) -> Node 1111; Next hop -> Node 3333
+- (3.0) -> Node 2222; Next hop -> Node 4444
+- (2.0) -> Node 3333
+- (2.0) -> Node 4444
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py ls r 2 1111 2222 1 3333 50
+python3 routenode.py ls r 2 2222 1111 1 3333 2 4444 8
+python3 routenode.py ls r 2 3333 1111 50 2222 2 4444 5
+python3 routenode.py ls r 2 4444 2222 8 3333 5 last
+
+FINAL RTNG_TBLS:
+
+[1651113228.2935016] Node 1111 Routing Table
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222
+- (8.0) -> Node 4444; Next hop -> Node 2222
+
+[1651113228.2914405] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+- (7.0) -> Node 4444; Next hop -> Node 3333
+
+[1651113228.500705] Node 3333 Routing Table
+- (3.0) -> Node 1111; Next hop -> Node 2222
+- (2.0) -> Node 2222
+- (5.0) -> Node 4444
+
+[1651113238.2845871] Node 4444 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 3333 
+- (7.0) -> Node 2222; Next hop -> Node 3333 
+- (5.0) -> Node 3333
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py ls r 2 1111 2222 2 4444 9
+python3 routenode.py ls r 2 2222 1111 2 3333 4
+python3 routenode.py ls r 2 3333 4444 2 2222 4
+python3 routenode.py ls r 2 4444 1111 9 3333 2 last
+
+FINAL RTNG_TBLS:
+
+[1651118050.1392145] Node 1111 Routing Table
+- (2.0) -> Node 2222
+- (6.0) -> Node 3333; Next hop -> Node 2222 
+- (8.0) -> Node 4444; Next hop -> Node 2222 
+
+[1651118050.136008] Node 2222 Routing Table
+- (2.0) -> Node 1111
+- (4.0) -> Node 3333
+- (6.0) -> Node 4444; Next hop -> Node 3333 
+
+[1651118050.133645] Node 3333 Routing Table
+- (6.0) -> Node 1111; Next hop -> Node 2222
+- (4.0) -> Node 2222
+- (2.0) -> Node 4444
+
+[1651118060.1192558] Node 4444 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 3333
+- (6.0) -> Node 2222; Next hop -> Node 3333
+- (2.0) -> Node 3333
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py ls r 2 1111 2222 7 4444 5
+python3 routenode.py ls r 2 2222 1111 7 3333 2 4444 1
+python3 routenode.py ls r 2 3333 2222 2 4444 4
+python3 routenode.py ls r 2 4444 1111 5 2222 1 3333 4 last
+
+FINAL RTNG_TBLS:
+
+[1651118367.6712506] Node 1111 Routing Table
+- (6.0) -> Node 2222; Next hop -> Node 4444 
+- (8.0) -> Node 3333; Next hop -> Node 4444 
+- (5.0) -> Node 4444
+
+[1651118367.6727693] Node 2222 Routing Table
+- (6.0) -> Node 1111; Next hop -> Node 4444 
+- (2.0) -> Node 3333
+- (1.0) -> Node 4444
+
+[1651118367.6712532] Node 3333 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 2222
+- (2.0) -> Node 2222
+- (3.0) -> Node 4444; Next hop -> Node 2222
+
+[1651118377.6305544] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222
+
+-----------------------------------------------------------------------------------------------------------------------------
+python3 routenode.py ls r 2 1111 2222 1 3333 50
+python3 routenode.py ls r 2 2222 1111 1 3333 2
+python3 routenode.py ls r 2 3333 1111 50 2222 2 last 60
+
+
+FINAL RTNG_TBLS:
+
+[1651118704.1149638] Node 1111 Routing Table
+- (1.0) -> Node 2222
+- (50.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651118704.113254] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111
+
+[1651118704.112778] Node 3333 Routing Table
+- (50.0) -> Node 1111; Next hop -> Node 2222
+- (51.0) -> Node 2222
+
+===========================================================================================================================
+===========================================================================================================================
+
+DISTANCE VECTOR TESTS:
+
+===========================================================================================================================
+===========================================================================================================================
+
+python3 routenode.py dv r 2 1111 2222 4 3333 5 4444 10
+python3 routenode.py dv r 2 2222 1111 4 4444 3
+python3 routenode.py dv r 2 3333 1111 5 5555 7
+python3 routenode.py dv r 2 4444 1111 10 2222 3 5555 2
+python3 routenode.py dv r 2 5555 3333 7 4444 2 last
+
+
+FINAL RTNG_TBLS:
+
+[1651118836.2324908] Node 1111 Routing Table
+- (4.0) -> Node 2222
+- (5.0) -> Node 3333
+- (7.0) -> Node 4444; Next hop -> Node 2222 
+- (9.0) -> Node 5555; Next hop -> Node 2222 
+
+[1651118836.2330909] Node 2222 Routing Table
+- (4.0) -> Node 1111
+- (9.0) -> Node 3333; Next hop -> Node 1111
+- (3.0) -> Node 4444
+- (5.0) -> Node 5555; Next hop -> Node 4444
+
+[1651118836.228769] Node 3333 Routing Table
+- (5.0) -> Node 1111
+- (9.0) -> Node 2222; Next hop -> Node 1111
+- (9.0) -> Node 4444; Next hop -> Node 5555
+- (7.0) -> Node 5555
+
+[1651118836.2308595] Node 4444 Routing Table
+- (7.0) -> Node 1111; Next hop -> Node 2222 
+- (3.0) -> Node 2222
+- (9.0) -> Node 3333; Next hop -> Node 5555 
+- (2.0) -> Node 5555
+
+[1651118836.2300293] Node 5555 Routing Table
+- (9.0) -> Node 1111; Next hop -> Node 4444
+- (5.0) -> Node 2222; Next hop -> Node 4444
+- (7.0) -> Node 3333
+- (2.0) -> Node 4444
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py dv r 2 1111 2222 3 3333 1 4444 6 5555 9
+python3 routenode.py dv r 2 2222 1111 3 4444 1
+python3 routenode.py dv r 2 3333 1111 1 5555 2
+python3 routenode.py dv r 2 4444 1111 6 2222 1 5555 2
+python3 routenode.py dv r 2 5555 1111 9 3333 2 4444 2 last
+
+
+FINAL RTNG_TBLS:
+
+[1651119193.3723433] Node 1111 Routing Table
+- (3.0) -> Node 2222
+- (1.0) -> Node 3333
+- (4.0) -> Node 4444; Next hop -> Node 2222 
+- (3.0) -> Node 5555; Next hop -> Node 3333 
+
+[1651119193.376803] Node 2222 Routing Table
+- (3.0) -> Node 1111
+- (4.0) -> Node 3333; Next hop -> Node 1111 
+- (1.0) -> Node 4444
+- (3.0) -> Node 5555; Next hop -> Node 4444 
+
+[1651119193.375872] Node 3333 Routing Table
+- (1.0) -> Node 1111
+- (4.0) -> Node 2222; Next hop -> Node 1111
+- (4.0) -> Node 4444; Next hop -> Node 5555
+- (2.0) -> Node 5555
+
+[1651119193.3752317] Node 4444 Routing Table
+- (4.0) -> Node 1111; Next hop -> Node 2222 
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333; Next hop -> Node 5555 
+- (2.0) -> Node 5555
+
+[1651119193.3778908] Node 5555 Routing Table
+- (3.0) -> Node 1111; Next hop -> Node 3333
+- (3.0) -> Node 2222; Next hop -> Node 4444
+- (2.0) -> Node 3333
+- (2.0) -> Node 4444
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py dv r 2 1111 2222 1 3333 50
+python3 routenode.py dv r 2 2222 1111 1 3333 2 4444 8
+python3 routenode.py dv r 2 3333 1111 50 2222 2 4444 5
+python3 routenode.py dv r 2 4444 2222 8 3333 5 last
+
+
+FINAL RTNG_TBLS:
+
+[1651119336.6489966] Node 1111 Routing Table
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+- (8.0) -> Node 4444; Next hop -> Node 2222 
+
+[1651119336.6459625] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+- (7.0) -> Node 4444; Next hop -> Node 3333
+
+[1651119336.6475623] Node 3333 Routing Table
+- (3.0) -> Node 1111; Next hop -> Node 2222
+- (2.0) -> Node 2222
+- (5.0) -> Node 4444
+
+[1651119336.6485784] Node 4444 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 3333
+- (7.0) -> Node 2222; Next hop -> Node 3333
+- (5.0) -> Node 3333
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+python3 routenode.py dv r 2 1111 2222 2 4444 9
+python3 routenode.py dv r 2 2222 1111 2 3333 4
+python3 routenode.py dv r 2 3333 4444 2 2222 4
+python3 routenode.py dv r 2 4444 1111 9 3333 2 last
+
+FINAL RTNG_TBLS:
+
+[1651119649.7930167] Node 1111 Routing Table
+- (2.0) -> Node 2222
+- (6.0) -> Node 3333; Next hop -> Node 2222 
+- (8.0) -> Node 4444; Next hop -> Node 2222 
+
+[1651119649.7918634] Node 2222 Routing Table
+- (2.0) -> Node 1111
+- (4.0) -> Node 3333
+- (6.0) -> Node 4444; Next hop -> Node 3333
+
+[1651119649.7904189] Node 3333 Routing Table
+- (6.0) -> Node 1111; Next hop -> Node 2222
+- (4.0) -> Node 2222
+- (2.0) -> Node 4444
+
+[1651119649.7930608] Node 4444 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 3333
+- (6.0) -> Node 2222; Next hop -> Node 3333
+- (2.0) -> Node 3333
+
+-----------------------------------------------------------------------------------------------------------------------------
+
+python3 routenode.py dv r 2 1111 2222 2 4444 9
+python3 routenode.py dv r 2 2222 1111 2 3333 4
+python3 routenode.py dv r 2 3333 4444 2 2222 4
+python3 routenode.py dv r 2 4444 1111 9 3333 2 last
+
+FINAL RTNG_TBLS:
+
+[1651120333.862383] Node 1111 Routing Table
+- (2.0) -> Node 2222
+- (6.0) -> Node 3333; Next hop -> Node 2222 
+- (8.0) -> Node 4444; Next hop -> Node 2222 
+
+[1651120333.8620226] Node 2222 Routing Table
+- (2.0) -> Node 1111
+- (4.0) -> Node 3333
+- (6.0) -> Node 4444; Next hop -> Node 3333
+
+[1651120333.862932] Node 3333 Routing Table
+- (6.0) -> Node 1111; Next hop -> Node 2222 
+- (4.0) -> Node 2222
+- (2.0) -> Node 4444
+
+[1651120333.8626199] Node 4444 Routing Table
+- (8.0) -> Node 1111; Next hop -> Node 3333
+- (6.0) -> Node 2222; Next hop -> Node 3333
+- (2.0) -> Node 3333
+
+
+===========================================================================================================================
+===========================================================================================================================
+
+
+DISTANCE VECTOR POISONED-REVERSE VS REGULAR (WHOLE OUTPUT TO SHOW
+SPEEDS OF CONVERGENCE):
+
+===========================================================================================================================
+===========================================================================================================================
+
+
+python3 routenode.py dv r 2 1111 2222 1 3333 50
+python3 routenode.py dv r 2 2222 1111 1 3333 2
+python3 routenode.py dv r 2 3333 1111 50 2222 2 last 60
+
+OUTPUT (Node 2222): 
+
+[1651120548.8954186] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+
+
+[1651120554.7836664] Message recieved at Node 2222 from Node 3333
+[1651120554.7837808] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120554.784046] Message sent from Node 2222 to Node 1111
+[1651120554.7843456] Message sent from Node 2222 to Node 3333
+[1651120554.784929] Message recieved at Node 2222 from Node 1111
+[1651120554.7851052] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120554.7859128] Message recieved at Node 2222 from Node 1111
+[1651120554.7860777] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120554.7867677] Message recieved at Node 2222 from Node 3333
+[1651120554.786806] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120554.7883031] Message recieved at Node 2222 from Node 3333
+[1651120554.7884152] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120564.7942579] Link value message recieved at Node 2222 from Node 3333
+ [3333]
+
+[1651120564.7945929] Message sent from Node 2222 to Node 1111
+[1651120564.7951865] Message sent from Node 2222 to Node 3333
+[1651120564.7959547] Message recieved at Node 2222 from Node 3333
+[1651120564.796275] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (4.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.7968814] Message recieved at Node 2222 from Node 1111
+[1651120564.7969656] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (6.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.7974727] Message sent from Node 2222 to Node 1111
+[1651120564.797523] Message sent from Node 2222 to Node 3333
+[1651120564.797166] Message sent from Node 2222 to Node 1111
+[1651120564.7976375] Message sent from Node 2222 to Node 3333
+[1651120564.7977185] Message recieved at Node 2222 from Node 3333
+[1651120564.7977571] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (6.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.7984524] Message recieved at Node 2222 from Node 1111
+[1651120564.798729] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (6.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.7995307] Message recieved at Node 2222 from Node 3333
+[1651120564.7995968] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (6.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8002048] Message recieved at Node 2222 from Node 3333
+[1651120564.800522] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (6.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8007226] Message recieved at Node 2222 from Node 1111
+[1651120564.8008244] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (8.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8016264] Message sent from Node 2222 to Node 1111
+[1651120564.8017485] Message sent from Node 2222 to Node 3333
+[1651120564.8024995] Message recieved at Node 2222 from Node 1111
+[1651120564.8026946] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (10.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8029368] Message sent from Node 2222 to Node 1111
+[1651120564.8029952] Message sent from Node 2222 to Node 3333
+[1651120564.8037584] Message recieved at Node 2222 from Node 3333
+[1651120564.8042302] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (10.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.804423] Message recieved at Node 2222 from Node 3333
+[1651120564.8045776] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (10.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8055537] Message recieved at Node 2222 from Node 3333
+[1651120564.8057578] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (10.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.806321] Message recieved at Node 2222 from Node 1111
+[1651120564.8066442] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (12.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8068943] Message sent from Node 2222 to Node 1111
+[1651120564.8069386] Message sent from Node 2222 to Node 3333
+[1651120564.8070376] Message recieved at Node 2222 from Node 3333
+[1651120564.8070805] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (12.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.807203] Message recieved at Node 2222 from Node 3333
+[1651120564.8073108] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (12.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.80804] Message recieved at Node 2222 from Node 1111
+[1651120564.8080869] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (14.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.808256] Message sent from Node 2222 to Node 1111
+[1651120564.8082974] Message sent from Node 2222 to Node 3333
+[1651120564.809059] Message recieved at Node 2222 from Node 3333
+[1651120564.8091767] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (14.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.809377] Message recieved at Node 2222 from Node 1111
+[1651120564.8094552] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (16.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8095555] Message sent from Node 2222 to Node 1111
+[1651120564.8095834] Message sent from Node 2222 to Node 3333
+[1651120564.8119411] Message recieved at Node 2222 from Node 1111
+[1651120564.8121195] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111
+
+[1651120564.8122318] Message sent from Node 2222 to Node 1111
+[1651120564.8122642] Message sent from Node 2222 to Node 3333
+[1651120564.813333] Message recieved at Node 2222 from Node 3333
+[1651120564.8135996] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8138156] Message recieved at Node 2222 from Node 3333
+[1651120564.8140779] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.814573] Message recieved at Node 2222 from Node 3333
+[1651120564.81461] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.814781] Message recieved at Node 2222 from Node 3333
+[1651120564.814822] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8149507] Message recieved at Node 2222 from Node 3333
+[1651120564.814985] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8151991] Message recieved at Node 2222 from Node 3333
+[1651120564.8156757] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (18.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8168204] Message recieved at Node 2222 from Node 1111
+[1651120564.816996] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (20.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8172696] Message sent from Node 2222 to Node 1111
+[1651120564.817455] Message sent from Node 2222 to Node 3333
+[1651120564.8181474] Message recieved at Node 2222 from Node 3333
+[1651120564.818485] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (20.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8187726] Message recieved at Node 2222 from Node 3333
+[1651120564.8189714] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (20.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8194754] Message recieved at Node 2222 from Node 1111
+[1651120564.819567] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (22.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8197987] Message sent from Node 2222 to Node 1111
+[1651120564.8203852] Message recieved at Node 2222 from Node 3333
+[1651120564.8204722] Message sent from Node 2222 to Node 3333
+[1651120564.8206196] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (22.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8216922] Message recieved at Node 2222 from Node 1111
+[1651120564.821866] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (24.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8223977] Message sent from Node 2222 to Node 1111
+[1651120564.822436] Message recieved at Node 2222 from Node 3333
+[1651120564.822659] Node 2222 Routing Table
+
+[1651120564.8227942] Message sent from Node 2222 to Node 3333- (1.0) -> Node 1111
+- (24.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8231747] Message recieved at Node 2222 from Node 3333
+[1651120564.823349] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (24.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8237271] Message recieved at Node 2222 from Node 3333
+[1651120564.824303] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (24.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.824737] Message recieved at Node 2222 from Node 1111
+[1651120564.825032] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (26.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8251197] Message sent from Node 2222 to Node 1111
+[1651120564.8251498] Message sent from Node 2222 to Node 3333
+[1651120564.8265314] Message recieved at Node 2222 from Node 3333
+[1651120564.827195] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (26.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8278482] Message recieved at Node 2222 from Node 3333
+[1651120564.8279378] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (26.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.828143] Message recieved at Node 2222 from Node 1111
+[1651120564.8281875] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (28.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8282852] Message sent from Node 2222 to Node 1111
+[1651120564.828317] Message sent from Node 2222 to Node 3333
+[1651120564.8284788] Message recieved at Node 2222 from Node 3333
+[1651120564.8285227] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (28.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.829222] Message recieved at Node 2222 from Node 1111
+[1651120564.8295295] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (30.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8298018] Message sent from Node 2222 to Node 1111
+[1651120564.8298314] Message sent from Node 2222 to Node 3333
+[1651120564.8299313] Message recieved at Node 2222 from Node 3333
+[1651120564.8301299] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (30.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8309746] Message recieved at Node 2222 from Node 1111
+[1651120564.8313293] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (32.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8315072] Message sent from Node 2222 to Node 1111
+[1651120564.8315477] Message sent from Node 2222 to Node 3333
+[1651120564.8316734] Message recieved at Node 2222 from Node 3333
+[1651120564.8317502] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (32.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8323197] Message recieved at Node 2222 from Node 1111
+[1651120564.8325937] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (34.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8327026] Message sent from Node 2222 to Node 1111
+[1651120564.8327308] Message sent from Node 2222 to Node 3333
+[1651120564.8328593] Message recieved at Node 2222 from Node 3333
+[1651120564.8331256] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (34.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8337483] Message recieved at Node 2222 from Node 1111
+[1651120564.833806] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (36.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8339887] Message sent from Node 2222 to Node 1111
+[1651120564.834038] Message sent from Node 2222 to Node 3333
+[1651120564.8347027] Message recieved at Node 2222 from Node 1111
+[1651120564.8348582] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (38.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8349748] Message sent from Node 2222 to Node 1111
+[1651120564.8350046] Message sent from Node 2222 to Node 3333
+[1651120564.8358715] Message recieved at Node 2222 from Node 3333
+[1651120564.836261] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (38.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8369114] Message recieved at Node 2222 from Node 1111
+[1651120564.8387768] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.839153] Message recieved at Node 2222 from Node 3333
+[1651120564.839307] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8391774] Message sent from Node 2222 to Node 1111
+[1651120564.8395452] Message sent from Node 2222 to Node 3333
+[1651120564.839631] Message recieved at Node 2222 from Node 3333
+[1651120564.839696] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8400161] Message recieved at Node 2222 from Node 3333
+[1651120564.8401606] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.840638] Message recieved at Node 2222 from Node 3333
+[1651120564.8407533] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8409142] Message recieved at Node 2222 from Node 3333
+[1651120564.841794] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8419626] Message recieved at Node 2222 from Node 3333
+[1651120564.8423111] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8437014] Message recieved at Node 2222 from Node 3333
+[1651120564.843921] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (40.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8443303] Message recieved at Node 2222 from Node 1111
+[1651120564.8445108] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (42.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8446572] Message sent from Node 2222 to Node 1111
+[1651120564.8447428] Message sent from Node 2222 to Node 3333
+[1651120564.8449771] Message recieved at Node 2222 from Node 3333
+[1651120564.8452377] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (42.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8455338] Message recieved at Node 2222 from Node 3333
+[1651120564.8455868] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (42.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8466125] Message recieved at Node 2222 from Node 1111
+[1651120564.8471122] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (44.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.84732] Message sent from Node 2222 to Node 1111
+[1651120564.8474846] Message sent from Node 2222 to Node 3333
+[1651120564.847696] Message recieved at Node 2222 from Node 3333
+[1651120564.8478255] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (44.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.849004] Message recieved at Node 2222 from Node 3333
+[1651120564.8491948] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (44.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.849355] Message recieved at Node 2222 from Node 1111
+[1651120564.8496256] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (46.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.849726] Message sent from Node 2222 to Node 1111
+[1651120564.8498235] Message sent from Node 2222 to Node 3333
+[1651120564.8501043] Message recieved at Node 2222 from Node 3333
+[1651120564.8501704] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (46.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8508763] Message recieved at Node 2222 from Node 3333
+[1651120564.8516521] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (46.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.851825] Message recieved at Node 2222 from Node 3333
+[1651120564.8528368] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (46.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8530629] Message recieved at Node 2222 from Node 1111
+[1651120564.853214] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (48.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8534853] Message recieved at Node 2222 from Node 3333
+[1651120564.853548] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (48.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8536587] Message sent from Node 2222 to Node 1111
+[1651120564.8538594] Message sent from Node 2222 to Node 3333
+[1651120564.8542733] Message recieved at Node 2222 from Node 1111
+[1651120564.854538] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (50.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8549433] Message sent from Node 2222 to Node 1111
+[1651120564.855277] Message recieved at Node 2222 from Node 3333
+[1651120564.855486] Message sent from Node 2222 to Node 3333
+[1651120564.8555932] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (50.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8563206] Message recieved at Node 2222 from Node 3333
+[1651120564.8565288] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (50.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8569746] Message recieved at Node 2222 from Node 3333
+[1651120564.857196] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (50.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8576925] Message recieved at Node 2222 from Node 1111
+[1651120564.85794] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.858477] Message recieved at Node 2222 from Node 3333
+[1651120564.8585615] Message sent from Node 2222 to Node 1111
+[1651120564.858731] Node 2222 Routing Table
+
+[1651120564.858934] Message sent from Node 2222 to Node 3333- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8598735] Message recieved at Node 2222 from Node 1111
+[1651120564.8599536] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120564.8605914] Message recieved at Node 2222 from Node 3333
+[1651120564.8606524] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111
+
+-------------VS--------------
+
+python3 routenode.py dv p 2 1111 2222 1 3333 50
+python3 routenode.py dv p 2 2222 1111 1 3333 2
+python3 routenode.py dv p 2 3333 1111 50 2222 2 last 60
+
+
+OUTPUT (Node 2222):
+
+python3 routenode.py dv p 2 2222 1111 1 3333 2
+
+[1651120876.3722825] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.4352052] Message recieved at Node 2222 from Node 3333
+[1651120879.4354646] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.435957] Message sent from Node 2222 to Node 1111
+[1651120879.4361537] Message sent from Node 2222 to Node 3333
+[1651120879.437366] Message recieved at Node 2222 from Node 1111
+[1651120879.437848] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.4384205] Message recieved at Node 2222 from Node 3333
+[1651120879.4384763] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.4386082] Message recieved at Node 2222 from Node 3333
+[1651120879.4386444] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.4389062] Message sent from Node 2222 to Node 1111
+[1651120879.4390957] Message sent from Node 2222 to Node 3333
+[1651120879.4392107] Message recieved at Node 2222 from Node 1111
+[1651120879.439249] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120879.439367] Message sent from Node 2222 to Node 1111
+[1651120879.4394195] Message sent from Node 2222 to Node 3333
+[1651120879.4400735] Message recieved at Node 2222 from Node 3333
+[1651120879.4402578] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (2.0) -> Node 3333
+
+[1651120889.4458146] Link value message recieved at Node 2222 from Node 3333
+ [3333]
+
+
+[1651120889.446003] Message sent from Node 2222 to Node 1111
+[1651120889.446053] Message sent from Node 2222 to Node 3333
+[1651120889.447011] Message recieved at Node 2222 from Node 3333
+[1651120889.4471757] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (60) -> Node 3333
+
+[1651120889.4475944] Message recieved at Node 2222 from Node 1111
+[1651120889.4476395] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (60) -> Node 3333
+
+[1651120889.4485893] Message recieved at Node 2222 from Node 1111
+[1651120889.4486554] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120889.448831] Message sent from Node 2222 to Node 1111
+[1651120889.448877] Message sent from Node 2222 to Node 3333
+[1651120889.449563] Message recieved at Node 2222 from Node 1111
+[1651120889.4499984] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120889.4513733] Message recieved at Node 2222 from Node 3333
+[1651120889.4515204] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120889.4517317] Message sent from Node 2222 to Node 1111
+[1651120889.451769] Message sent from Node 2222 to Node 3333
+[1651120889.451886] Message recieved at Node 2222 from Node 3333
+[1651120889.452213] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111 
+
+[1651120889.4528248] Message recieved at Node 2222 from Node 1111
+[1651120889.4528687] Node 2222 Routing Table
+- (1.0) -> Node 1111
+- (51.0) -> Node 3333; Next hop -> Node 1111
+-----------------------------------------------------------------------------------------------------------------------------
+
+
+NOTE THAT THE OUTPUTS ARE THE SAME BC THE EFFECTED NODE DOES NOT CHANGE Node
+4444's DV!
+
+
+python3 routenode.py dv r 2 1111 2222 7 4444 5
+python3 routenode.py dv r 2 2222 1111 7 3333 2 4444 1
+python3 routenode.py dv r 2 3333 2222 2 4444 4
+python3 routenode.py dv r 2 4444 1111 5 2222 1 3333 4 last 60
+
+OUTPUT(NODE 4444) :
+
+python3 routenode.py dv r 2 4444 1111 5 2222 1 3333 4 last 60
+
+[1651121859.9676752] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121859.9680483] Message sent from Node 4444 to Node 1111
+[1651121859.968111] Message sent from Node 4444 to Node 2222
+[1651121859.968145] Message sent from Node 4444 to Node 3333
+[1651121859.9732227] Message recieved at Node 4444 from Node 1111
+[1651121859.9735239] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121859.9736662] Message sent from Node 4444 to Node 1111
+[1651121859.9736953] Message sent from Node 4444 to Node 2222
+[1651121859.9737217] Message sent from Node 4444 to Node 3333
+[1651121859.974632] Message recieved at Node 4444 from Node 2222
+[1651121859.9747956] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.9749427] Message sent from Node 4444 to Node 1111
+[1651121859.9749749] Message sent from Node 4444 to Node 2222
+[1651121859.9750009] Message sent from Node 4444 to Node 3333
+[1651121859.9758072] Message recieved at Node 4444 from Node 3333
+[1651121859.9766521] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.9768343] Message recieved at Node 4444 from Node 2222
+[1651121859.9769976] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.9774895] Message recieved at Node 4444 from Node 1111
+[1651121859.9776115] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.9780853] Message recieved at Node 4444 from Node 3333
+[1651121859.9782355] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.9785612] Message recieved at Node 4444 from Node 1111
+[1651121859.9786866] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121859.978873] Message recieved at Node 4444 from Node 3333
+[1651121859.9789627] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121869.9821887] Node 3333 cost updated to 60
+[1651121869.9824429] Link value message sent from Node 4444 to Node 3333
+
+
+-------------VS--------------
+
+
+python3 routenode.py dv p 2 1111 2222 7 4444 5
+python3 routenode.py dv p 2 2222 1111 7 3333 2 4444 1
+python3 routenode.py dv p 2 3333 2222 2 4444 4
+python3 routenode.py dv p 2 4444 1111 5 2222 1 3333 4 last 60
+
+OUTPUT:
+
+ python3 routenode.py dv p 2 4444 1111 5 2222 1 3333 4 last 60
+
+[1651121741.537761] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121741.5381234] Message sent from Node 4444 to Node 1111
+[1651121741.5384173] Message sent from Node 4444 to Node 2222
+[1651121741.5384872] Message sent from Node 4444 to Node 3333
+[1651121741.5406544] Message recieved at Node 4444 from Node 3333
+[1651121741.540937] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121741.541538] Message sent from Node 4444 to Node 1111
+[1651121741.5416818] Message sent from Node 4444 to Node 2222
+[1651121741.5418322] Message sent from Node 4444 to Node 3333
+[1651121741.54328] Message recieved at Node 4444 from Node 1111
+[1651121741.5434992] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121741.5458581] Message recieved at Node 4444 from Node 1111
+[1651121741.5460572] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (4.0) -> Node 3333
+
+[1651121741.5463197] Message recieved at Node 4444 from Node 2222
+[1651121741.5465515] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5466728] Message sent from Node 4444 to Node 1111
+[1651121741.5468245] Message sent from Node 4444 to Node 2222
+[1651121741.547572] Message recieved at Node 4444 from Node 2222
+[1651121741.5476217] Node 4444 Routing Table
+
+[1651121741.5476446] Message sent from Node 4444 to Node 3333- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5488126] Message recieved at Node 4444 from Node 3333
+[1651121741.5492601] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5498526] Message recieved at Node 4444 from Node 3333
+[1651121741.5499096] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.550154] Message sent from Node 4444 to Node 1111
+[1651121741.5502033] Message sent from Node 4444 to Node 2222
+[1651121741.550241] Message sent from Node 4444 to Node 3333
+[1651121741.5506082] Message recieved at Node 4444 from Node 1111
+[1651121741.5507567] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5537443] Message recieved at Node 4444 from Node 2222
+[1651121741.5541484] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5554874] Message recieved at Node 4444 from Node 3333
+[1651121741.5555382] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5557985] Message recieved at Node 4444 from Node 2222
+[1651121741.5558424] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121741.5563078] Message recieved at Node 4444 from Node 1111
+[1651121741.55655] Node 4444 Routing Table
+- (5.0) -> Node 1111
+- (1.0) -> Node 2222
+- (3.0) -> Node 3333; Next hop -> Node 2222 
+
+[1651121751.5490024] Node 3333 cost updated to 60
+[1651121751.5491266] Link value message sent from Node 4444 to Node 3333
+
+
+===========================================================================================================================
+===========================================================================================================================
+

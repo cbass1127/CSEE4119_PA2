@@ -34,6 +34,8 @@ def display_rtng_tbl(dist):
         global my_port
         pmessage('Node {0} Routing Table\n'.format(my_port))
         for k in sorted(dist.keys()):
+                if dist[k] == float('inf'):
+                        continue
                 if k == my_port:
                         continue
                 print('- (' + str(dist[k])  + ') -> Node ' + str(k), end = '')
@@ -63,13 +65,15 @@ def update_lsa_info(msg, port):
                 try:
                         p = Port(msg[i])
                         c = Cost(msg[i + 1])
-                        if p in peer_links[port].keys() and c != peer_links[port][p]:
+                        if p in peer_links[port].keys() and c != peer_links[port][p]\
+                        or p not in peer_links[port].keys():
                                 changed = True
                         peer_links[port][p] = c
                 except Exception as e:
                         return
         if changed:
                 display_ntwk_top()
+                dijkstra()
 
 def link_change(msg):
         try:
@@ -81,16 +85,17 @@ def link_change(msg):
                 return
 
 def vert_min_distance(verts, dist):
-        minimum = sys.maxsize
-        mvert = my_port 
+        minimum = float('inf')
+        mvert = -1 
         for vert in verts:
-                if dist[vert] < minimum:
+                if dist[vert] <= minimum:
                         minimum = dist[vert]
                         mvert = vert
         return mvert
 
 
 def dijkstra():
+        global my_port
         dist = dict()
         verts = set()
         for p in peers:  
@@ -104,9 +109,9 @@ def dijkstra():
         dist[my_port] = 0
         while verts:
                 u = vert_min_distance(verts, dist)
+                if u == -1:
+                        break
                 verts.remove(u)
-                #if u == 2222:
-                #        print('distance to 2222', dist[u], ' NEXT STEP: ', rtng_tbl[u])
                 if u not in peer_links.keys():
                         continue
                 for v in peer_links[u].keys():
@@ -182,10 +187,11 @@ def init_state_info_ls(peer_ports, peer_costs):
 
 def node_init_ls(argv):
         peer_ports, peer_costs = parse_peers_ls(argv)
-        #print('PEER PORTS :', peer_ports)
-        #print('PEER COSTS : ', peer_costs)
-        #print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
-        #print('LAST: ', LAST)
+        print('PEER PORTS :', peer_ports)
+        print('PEER COSTS : ', peer_costs)
+        print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
+        print('LAST: ', LAST)
+        print('LINK CHANGE: ', TIMER)
         init_state_info_ls(peer_ports, peer_costs)
 
 def start_ls(argv):
@@ -205,6 +211,7 @@ def message_proc(sender_message, s_port):
         if msg[0] == 'T':
                 pmessage('Link value message received at Node {} from Node {}'.format(my_port, s_port))
                 link_change(msg[1:])
+                display_ntwk_top()
                 dijkstra()
                 send_lsa()
                 return
@@ -237,7 +244,6 @@ def message_proc(sender_message, s_port):
                 latest[port] = seqno
                 peers_rcvd.add(msg_tup)
                 relay_msg(sender_message, port, seqno, True, [port])
-
         update_lsa_info(msg[2:], port) 
         lock.release()
         if not shared_tbl:
@@ -263,11 +269,8 @@ def timer_send():
 
 def timer_update():
         global shared_tbl, ROUTING_INTERVAL
-        while not shared_tbl:
-                pass
-        while True:
-                time.sleep(ROUTING_INTERVAL)
-                dijkstra()
+        time.sleep(ROUTING_INTERVAL)
+        dijkstra()
 
 def timer_trigger():
         global TRIGGER_CHANGE
@@ -284,16 +287,14 @@ def main_ls(argv):
                 send_lsa()
                 shared_tbl = True 
         if TIMER > 0:
-                tthread = threading.Thread(target = timer_trigger)
-                tthread.start()
+                gthread = threading.Thread(target = timer_trigger)
+                gthread.start()
         tthread = threading.Thread(target = timer_send)
         uthread = threading.Thread(target = timer_update)
         tthread.start()
         uthread.start()
-        while(True):
+        while True:
                 sender_msg, sender_addr = my_sock.recvfrom(SIZE) 
                 pthread = threading.Thread(target = message_proc, args = (sender_msg.decode(), sender_addr[1])) 
                 pthread.start()
 
-#if __name__ == '__main__':
-#        main()
