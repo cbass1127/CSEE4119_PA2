@@ -5,19 +5,24 @@ from ls import start_ls
 from util import *
 from sys import argv
 
-POISON = False
-LAST = False
+POISON = False #Poison-Reverse?
+LAST = False #LAST CL param?
 shared_tbl = False
 my_port = -1
-TIMER = -1
-dv = dict()
-rtng_tbl = dict()
+TIMER = -1 #Value that link-cost change gets set to
+dv = dict() #distance vector for distance vector protocol.
+rtng_tbl = dict() #next step in path to dests
 lock = threading.Semaphore(1)
 latest = dict()
-peer_dvs = dict()
-nlink_costs = dict()
+peer_dvs = dict() #peer distance vectors
+nlink_costs = dict() #costs to neighbors through direct links
 
 def parse_peers():
+        '''
+        Reads in CL arguments specifying settings of dv mode e.g. timed link change 
+        and neigboring nodes info.
+        :return: peer_ports and peer_costs w/ neighboring ports and link costs 
+        '''
         global LAST, TIMER, POISON
         peer_ports = []
         peer_costs = []
@@ -39,6 +44,10 @@ def parse_peers():
         return peer_ports, peer_costs
 
 def display_rtng_tbl():
+        '''
+        Prints current routing table.         
+        :return: None  
+        '''
         global my_port
         pmessage('Node {0} Routing Table\n'.format(my_port))
         for k in sorted(dv.keys()):
@@ -50,6 +59,10 @@ def display_rtng_tbl():
                 print()
 
 def init_state_info(peer_ports, peer_costs):
+        '''
+        Intializes all datastructures for dv protocol.         
+        :return: None  
+        '''
         for i in range(len(peer_ports)):
                 p_port = peer_ports[i]
                 p_cost = peer_costs[i]
@@ -61,11 +74,19 @@ def init_state_info(peer_ports, peer_costs):
         rtng_tbl[my_port] = my_port
 
 def node_init():
+        '''
+        parses CL args and fills intializes datastructures.         
+        :return: None  
+        '''
         peer_ports, peer_costs = parse_peers()
         init_state_info(peer_ports, peer_costs)
         display_rtng_tbl()    
 
 def dv_msg(fake = False, fakedv = None):
+        '''
+        Formats special DV message to be sent to neigboring nodes.         
+        :return: None  
+        '''
         global my_port
         costmap = dv if not fake else fakedv
         s = str(time.time()) + ' ' + str(my_port) + ' '  
@@ -93,6 +114,10 @@ def dv_msg(fake = False, fakedv = None):
 
 
 def find_rtng_keys(value):
+        '''
+        Finds associated key given a value(destination) of the rtng_tbl.         
+        :return: Associated key
+        '''
         keys = []
         for k,v in rtng_tbl.items():
                 if v == value:
@@ -100,6 +125,11 @@ def find_rtng_keys(value):
         return keys
 
 def send_dv(socket):
+        '''
+        Sends DV to all neigbors. If in poisoned-reverse mode,
+        send link cost of infinity to neighbor if it is used to reach a dest.         
+        :return: None
+        '''
         global my_port
         dv_dgram = dv_msg().encode()
         for k,v in dv.items():
@@ -115,6 +145,10 @@ def send_dv(socket):
                 pmessage('Message sent from Node {0} to Node {1}'.format(str(my_port), str(k)))
 
 def perform_dvr_update(nport, dport, cost):
+        '''
+        Take neigbor DV and update distances and own dv if neccessary
+        :return: None
+        '''
         dv[dport] = cost
         rtng_tbl[dport] = rtng_tbl[nport]
         for k,v in dv.items():
@@ -135,9 +169,12 @@ def perform_dvr_update(nport, dport, cost):
 #                send_dv(socket, True, intermediate, fake_dv)    
                 
 def check_cost_increase(nport, msg, ts):
+        '''
+        Check if a neighbors cost increased to a dest that we use.
+        :return: Boolean indicating whether cost to dest increased.
+        '''
         isincreased = False
         peer_dv = dict()
-        
         if nport not in peer_dvs.keys():
                 return False
         for i in range(0, len(msg), 2):
@@ -158,6 +195,10 @@ def check_cost_increase(nport, msg, ts):
         return isincreased
 
 def recalibrate_state(socket):
+        '''
+        Update DV based on new information from neigbors 
+        :return: True always (implentation kink).
+        '''
         ischanged = False
         cost = -1 
         for dest in dv.keys():
@@ -185,6 +226,11 @@ def recalibrate_state(socket):
         return True 
 
 def update_min_path(affected_dests):
+        '''
+        Used for timed-linked change: update dv and shortest paths of destinations
+        effected by link cost change
+        :return: None.
+        '''
         global my_port
         for dest in affected_dests:
                 curr = dv[dest]
@@ -193,7 +239,7 @@ def update_min_path(affected_dests):
                                 continue 
                         if dest in peer_dvs[k].keys() and dv[k] + peer_dvs[k][dest] < curr:
                                 perform_dvr_update(k, dest, dv[k] + peer_dvs[k][dest])
-                                dv[k] + peer_dvs[k][dest], dv[k], peer_dvs[k][dest]))  
+#                                dv[k] + peer_dvs[k][dest], dv[k], peer_dvs[k][dest]))  
                         elif dest == k and nlink_costs[k] < curr:
                                 dv[dest] = nlink_costs[k]
                                 rtng_tbl[dest] = k
@@ -204,6 +250,10 @@ def update_min_path(affected_dests):
                                 perform_dvr_update(k, k2, v2 + dv[k])
 
 def affected_dests(node, diff):
+        '''
+        Check for destinations effected by a local link-cost change
+        :return: effected destinations.
+        '''
         affected = []
         for k,v in rtng_tbl.items():
                 if v == node:
@@ -213,6 +263,10 @@ def affected_dests(node, diff):
         return affected
 
 def update_dv(nport, ts, msg, socket):
+        '''
+        Parse dv network message from neigbor. Check if updates need to be made to own dv
+        :return: Boolean indicating whether an update was made.
+        '''
         global my_port
         update = False
         peer_dv = dict()
@@ -248,12 +302,19 @@ def update_dv(nport, ts, msg, socket):
 
 
 def trigger_update(port, diff):
+        '''
+        Helper function to perform timed-link cost change
+        :return: Boolean indicating whether the link cost change effected local dv.
+        '''
         changed = False
         affected = affected_dests(port, diff)
         update_min_path(affected)
         return len(affected) > 0
 
 def triggered_change(socket, port, new_cost):
+        ''' Main function that responds to message indicating a link-cost change from neigbor.
+        :return: None.
+        '''
         diff = new_cost - nlink_costs[port]
         local_change = False
         if dv[port] == nlink_costs[port]:
@@ -265,6 +326,9 @@ def triggered_change(socket, port, new_cost):
                 send_dv(socket)
 
 def message_proc(sender_message, sock):
+        ''' Main function responsible for parsing incoming mesage from neigbor.
+        :return: None.
+        '''
         global shared_tbl, my_port
         try:
                 msg = sender_message.split()
@@ -291,15 +355,21 @@ def message_proc(sender_message, sock):
                 send_dv(sock)
 
 def trigger_ctrl_msg(socket, port):
+        ''' Create and send message indicating link-cost change to neighor.
+        :return: None.
+        '''
         global my_port
         linkc_dgram = ('LC ' + str(port) + ' ' + str(dv[port]) + ' ' + str(my_port)).encode() 
         Send(socket, linkc_dgram, ('127.0.0.1', port))        
         pmessage('Link value message sent from Node {0} to Node {1}'.format(my_port, port))
 
 def trigger_change(socket):
+        ''' Thread function responsible for initiating link-cost change Waits 30 seconds for changing cost.
+        :return: None.
+        '''
         global TIMER
         global my_port
-        time.sleep(10) #CHANGE!!!!
+        time.sleep(30) #CHANGE!!!!
         local_change = False
         ports = sorted(dv.keys())        
         max_port = ports[-1]
@@ -317,6 +387,9 @@ def trigger_change(socket):
         if ischanged or local_change:
                 send_dv(socket)
 def main():
+        ''' Main function, initalizes theads for handling incoming requests and timed-link cost change if needed.
+        :return: None.
+        '''
         global LAST, TIMER, POISON, my_port, dv, rtng_tbl
         if len(argv)< 5:
                 Die('Usage: routenode <dv/ls> <r/p> <update-interval> <local-port> <neighbor1-port> <cost-1> <neighbor2-port> <cost-2> ...'\

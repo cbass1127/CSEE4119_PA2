@@ -6,17 +6,17 @@ import sys
 import random
 
 
-ROUTING_INTERVAL = 10
-TRIGGER_CHANGE  = 1.2*ROUTING_INTERVAL
+ROUTING_INTERVAL = 30
+TRIGGER_CHANGE  = 1.2*ROUTING_INTERVAL #timer for triggered link-cost change.
 TRIGGERED = False
-my_sock = None
-MAX_SEQ_NO = sys.maxsize
-SEQ_NO = -1
-LAST = False
-UPDATE_INTERVAL = -1
+my_sock = None #socket to send messages
+MAX_SEQ_NO = sys.maxsize 
+SEQ_NO = -1 
+LAST = False #LAST in CL input?
+UPDATE_INTERVAL = -1 
 shared_tbl = False
 my_port = -1
-TIMER = -1
+TIMER = -1 #value link-cost change gets set to.
 dv = dict()
 lock = threading.Semaphore(1)
 
@@ -31,6 +31,10 @@ peer_links = dict()
 shortest_path = dict()
 
 def display_rtng_tbl(dist):
+        '''
+        Prints routing table
+        :return: None
+        ''' 
         global my_port
         pmessage('Node {0} Routing Table\n'.format(my_port))
         for k in sorted(dist.keys()):
@@ -44,6 +48,10 @@ def display_rtng_tbl(dist):
                 print()
 
 def display_ntwk_top():
+        '''
+        Prints known network topology
+        :return: None
+        ''' 
         global my_port
         pmessage('Node {0} Network topology\n'.format(my_port))
         for k in sorted(peer_links.keys()):
@@ -56,6 +64,10 @@ def display_ntwk_top():
                         print()
 
 def update_lsa_info(msg, port):
+        '''
+        Updates known information about topology. If there is a change, run dijkstra
+        :return: None
+        ''' 
         global my_port
         changed = False
         if port not in peer_links.keys():
@@ -76,6 +88,10 @@ def update_lsa_info(msg, port):
                 dijkstra()
 
 def link_change(msg):
+        '''
+        Updates local link-cost 
+        :return: None
+        ''' 
         try:
                 peer = Port(msg[0], False)
                 newcost = Cost(msg[1], False)      
@@ -85,16 +101,26 @@ def link_change(msg):
                 return
 
 def vert_min_distance(verts, dist):
-        minimum = float('inf')
-        mvert = -1 
-        for vert in verts:
+       '''
+       Gets the destination w/ the minimum distance
+       for dijkstras algo 
+       :return: node with closest distance 
+       ''' 
+       minimum = float('inf')
+       mvert = -1 
+       for vert in verts:
                 if dist[vert] <= minimum:
                         minimum = dist[vert]
                         mvert = vert
-        return mvert
+       return mvert
 
 
 def dijkstra():
+        '''
+        Dijkstra's shortest path algorithm. Updates routing table
+        with next hop in shortest path.
+        :return: None 
+        ''' 
         global my_port
         dist = dict()
         verts = set()
@@ -127,6 +153,10 @@ def dijkstra():
         #print(peer_links)
 
 def parse_peers_ls(argv):
+        '''
+        Take in CL args specifying link state settings and local network topology.
+        :return: peer_ports and peer_costs specifying local topology
+        ''' 
         global LAST, TIMER, UPDATE_INTERVAL
         peer_ports = []
         peer_costs = []
@@ -148,6 +178,10 @@ def parse_peers_ls(argv):
         return peer_ports, peer_costs
 
 def lsa_msg(trigger = False):
+        '''
+        Generates Link-state message to send over network.
+        :return: Formatted message to send over network 
+        ''' 
         global my_port, SEQ_NO
         seqno = str(time.time())
         if not trigger:
@@ -159,6 +193,10 @@ def lsa_msg(trigger = False):
         return s.encode(), seqno
 
 def send_lsa(omit = False, omits = None ):
+        '''
+        Send link state to all neigbors.
+        :return: None
+        ''' 
         global my_sock, my_port
         dgram, seqno = lsa_msg()
         for peer in peers:
@@ -167,12 +205,20 @@ def send_lsa(omit = False, omits = None ):
                         Send(my_sock, dgram, ('127.0.0.1', peer))
 
 def send_trigger_lsa(peer):
+        '''
+        Sends message notifying timed link-cost change.
+        :return: None
+        ''' 
         global my_sock, my_port
         dgram, seqno = lsa_msg(True)
         Send(my_sock, dgram, ('127.0.0.1', peer))
         pmessage('Link value message sent from Node {} to Node {}'.format(my_port, peer))
 
 def init_state_info_ls(peer_ports, peer_costs):
+        '''
+        Intializes ls data structures.
+        :return: None
+        ''' 
         for i in range(len(peer_ports)):
                 p_port = peer_ports[i]
                 p_cost = peer_costs[i]
@@ -186,18 +232,30 @@ def init_state_info_ls(peer_ports, peer_costs):
         rtng_tbl[my_port] = my_port
 
 def node_init_ls(argv):
+        '''
+        Initialzes this ls instance
+        :return: None
+        '''
         peer_ports, peer_costs = parse_peers_ls(argv)
-        print('PEER PORTS :', peer_ports)
-        print('PEER COSTS : ', peer_costs)
-        print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
-        print('LAST: ', LAST)
-        print('LINK CHANGE: ', TIMER)
+        #print('PEER PORTS :', peer_ports)
+        #print('PEER COSTS : ', peer_costs)
+        #print('UPDATE INTERVAL: ', UPDATE_INTERVAL)
+        #print('LAST: ', LAST)
+        #print('LINK CHANGE: ', TIMER)
         init_state_info_ls(peer_ports, peer_costs)
 
 def start_ls(argv):
+        '''
+        Called from routenode.py start ls mode
+        :return: None
+        '''
         main_ls(argv)
 
 def relay_msg(sender_message, port, seqno, omit = False, omits = None):
+        '''
+        Passes on link-state message from peer to neigbors
+        :return: None
+        '''
         global my_sock
         dgram = sender_message.encode()
         for peer in peers:
@@ -206,6 +264,12 @@ def relay_msg(sender_message, port, seqno, omit = False, omits = None):
                         Send(my_sock, dgram, ('127.0.0.1', peer))
 
 def message_proc(sender_message, s_port):
+        '''
+        Proccesses incoming message from network, updating ls and relaying messages if needed.
+        Also makes sure same message not relayed twice by keeping set of messages recieved w/ their
+        seqununce number
+        :return: None
+        '''
         global my_sock, shared_tbl, lock, peers_rcvd
         msg = sender_message.split()
         if msg[0] == 'T':
@@ -251,6 +315,10 @@ def message_proc(sender_message, s_port):
                 send_lsa()
                 
 def trigger_cost_change():
+        '''
+        Begin link-cost change locally and eventually tell neigbor
+        :return: None
+        '''
         global TIMER
         largest = max(peers) 
         lsa[largest] = TIMER
@@ -260,6 +328,10 @@ def trigger_cost_change():
         send_lsa()
 
 def timer_send():
+        '''
+        Send the link-state to all neigbors on a timer. Handled by specfic thread.
+        :return: None
+        '''
         global shared_tbl, UPDATE_INTERVAL
         while not shared_tbl:
                 pass
@@ -268,16 +340,29 @@ def timer_send():
                 send_lsa()
 
 def timer_update():
+        '''
+        Run dijkstras algorithm for the first time after ROUTING_INTERVAL. Handled by specfic thread.
+        :return: None
+        '''
         global shared_tbl, ROUTING_INTERVAL
         time.sleep(ROUTING_INTERVAL)
         dijkstra()
 
 def timer_trigger():
+        '''
+        Wait for TRIGGER_CHANGE to initiate link-cost change if necessary.
+        :return: None
+        '''
         global TRIGGER_CHANGE
         time.sleep(TRIGGER_CHANGE)
         trigger_cost_change()
 
 def main_ls(argv):
+        '''
+        Main function spawns threads to handle incoming messages and starts
+        other threads to handle link-cost change and first dijkstras run.
+        :return: None
+        '''
         global my_sock, my_port
         my_port = Port(argv[4])
         my_sock = Socket(my_port) 

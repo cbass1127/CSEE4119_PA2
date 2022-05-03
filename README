@@ -34,6 +34,12 @@ port number from the command line and datagrams.
 routenode.py is the interface to both DV and LS routing functionalities.
 Below, I give the command Syntax pulled DIRECTLY from the lab spec.
 
+To mitigate the problem of multiple of the exact message recvd in ls mode, I
+used a sequence number associated with each message that is just a timestamp
+of when it was sent. In this way , it is monotonically increasing and I can
+track if a message sent earlier is recieved by a peer so it can be canceled.
+
+
 ==========================================================================================================================================================
 
 FROM Prof. Gil Zussman @ COlumbia University
